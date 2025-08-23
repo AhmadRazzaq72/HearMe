@@ -1,50 +1,69 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*" }
-});
 
-const users = {}; // Map userId -> socketId
+const io = new Server(server, {
+  cors: {
+    origin: "*", // or restrict to your frontend's IP
+    methods: ["GET", "POST"]
+  }
+});
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("⚡ New client connected:", socket.id);
 
-  // Save userId and socket mapping
-  socket.on("join", (userId) => {
-  users[userId] = socket.id;
-  socket.userId = userId;
-  console.log("📌 Current users:", users);
-});
+  socket.on("join", ({ userId }) => {
+    socket.data.userId = userId;
+    console.log(`👤 ${userId} joined`);
+  });
 
-  // Caller sends offer
   socket.on("call-user", ({ userToCall, signalData, from }) => {
-    console.log(`call-user: ${from} -> ${userToCall}`);
-    if (users[userToCall]) {
-      io.to(users[userToCall]).emit("incoming-call", { signal: signalData, from });
+    const target = [...io.sockets.sockets.values()].find(
+      (s) => s.data.userId === userToCall
+    );
+    if (target) {
+      console.log(`📞 Call request from ${from} -> ${userToCall}`);
+      target.emit("incoming-call", { from, signal: signalData });
     }
   });
 
-  // Callee sends answer
   socket.on("answer-call", ({ to, signal }) => {
-    console.log(`answer-call: ${socket.userId} -> ${to}`);
-    if (users[to]) {
-      io.to(users[to]).emit("call-accepted", signal);
+    const target = [...io.sockets.sockets.values()].find(
+      (s) => s.data.userId === to
+    );
+    if (target) {
+      target.emit("call-accepted", signal);
     }
   });
 
-  // Handle disconnect
-  socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.userId}`);
-    if (socket.userId) {
-      delete users[socket.userId];
+  socket.on("decline-call", ({ to }) => {
+    const target = [...io.sockets.sockets.values()].find(
+      (s) => s.data.userId === to
+    );
+    if (target) {
+      target.emit("call-declined");
     }
+  });
+
+  socket.on("end-call", ({ to }) => {
+    const target = [...io.sockets.sockets.values()].find(
+      (s) => s.data.userId === to
+    );
+    if (target) {
+      target.emit("call-ended");
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`❌ ${socket.data.userId || "Unknown"} disconnected`);
   });
 });
 
-server.listen(5000, () =>
-  console.log("Signaling server running on port 5000")
-);
+// 👇 important: bind to 0.0.0.0 so it's visible on LAN
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Signaling server running at http://0.0.0.0:${PORT}`);
+});
