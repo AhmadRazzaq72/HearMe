@@ -1,10 +1,12 @@
 // src/socket.ts
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
-// Create a single socket instance
-export const socket = io("http://localhost:5000");
+// 👇 replace localhost with your ngrok https URL
+export const socket: Socket = io(
+  "https://18a444abdf15.ngrok-free.app", 
+  { transports: ["websocket"] }
+);
 
-// Function to join with a unique ID
-export const joinSocket = (userId: string) => {
-  socket.emit("join", userId);
-};
+export function joinSocket(userId: string) {
+  socket.emit("join", { userId });
+}
