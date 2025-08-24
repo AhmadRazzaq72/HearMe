@@ -35,6 +35,7 @@ io.on("connection", (socket) => {
       (s) => s.data.userId === to
     );
     if (target) {
+      console.log(`📞 Call Accepted`);
       target.emit("call-accepted", signal);
     }
   });
@@ -44,6 +45,8 @@ io.on("connection", (socket) => {
       (s) => s.data.userId === to
     );
     if (target) {
+            console.log(`❌ Call Declined`);
+
       target.emit("call-declined");
     }
   });
