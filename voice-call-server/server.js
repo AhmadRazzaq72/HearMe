@@ -20,13 +20,19 @@ io.on("connection", (socket) => {
     console.log(`👤 ${userId} joined`);
   });
 
-  socket.on("call-user", ({ userToCall, signalData, from }) => {
+  // ✅ FIXED: Added 'type' parameter
+  socket.on("call-user", ({ userToCall, signalData, from, type }) => {
     const target = [...io.sockets.sockets.values()].find(
       (s) => s.data.userId === userToCall
     );
     if (target) {
-      console.log(`📞 Call request from ${from} -> ${userToCall}`);
-      target.emit("incoming-call", { from, signal: signalData });
+      console.log(`📞 ${type || 'audio'} call request from ${from} -> ${userToCall}`);
+      // ✅ FIXED: Forward the call type
+      target.emit("incoming-call", { 
+        from, 
+        signal: signalData, 
+        type: type || 'audio' // Include the call type with fallback
+      });
     }
   });
 
@@ -45,8 +51,7 @@ io.on("connection", (socket) => {
       (s) => s.data.userId === to
     );
     if (target) {
-            console.log(`❌ Call Declined`);
-
+      console.log(`❌ Call Declined`);
       target.emit("call-declined");
     }
   });

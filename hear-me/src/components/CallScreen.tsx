@@ -1,5 +1,6 @@
 // CallScreen.tsx
 import React from "react";
+import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
 
 export default function CallScreen({
   peerUser,
@@ -31,12 +32,34 @@ export default function CallScreen({
       />
 
       {/* Controls */}
-      <div className="absolute bottom-4 flex gap-4">
-        <button onClick={onToggleMic}>{micOn ? "Mute" : "Unmute"}</button>
-        <button onClick={onToggleVideo}>
-          {videoOn ? "Video Off" : "Video On"}
+      <div className="absolute bottom-6 flex gap-6 bg-black/40 px-6 py-3 rounded-full">
+        {/* Mic Toggle */}
+        <button
+          onClick={onToggleMic}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white"
+        >
+          {micOn ? <Mic size={24} /> : <MicOff size={24} className="text-red-500" />}
         </button>
-        <button onClick={onEnd}>End</button>
+
+        {/* Video Toggle */}
+        <button
+          onClick={onToggleVideo}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white"
+        >
+          {videoOn ? (
+            <Video size={24} />
+          ) : (
+            <VideoOff size={24} className="text-red-500" />
+          )}
+        </button>
+
+        {/* End Call */}
+        <button
+          onClick={onEnd}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white"
+        >
+          <PhoneOff size={24} />
+        </button>
       </div>
     </div>
   );

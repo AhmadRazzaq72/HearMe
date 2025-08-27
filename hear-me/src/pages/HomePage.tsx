@@ -95,9 +95,9 @@ export default function HomePage() {
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
       remoteVideoRef.current.onloadedmetadata = () => {
-        remoteVideoRef.current?.play().catch((err) =>
-          console.warn("Remote video play blocked:", err)
-        );
+        remoteVideoRef.current
+          ?.play()
+          .catch((err) => console.warn("Remote video play blocked:", err));
       };
     }
   }
@@ -169,48 +169,164 @@ export default function HomePage() {
   };
 
   async function getMedia(withVideo = false) {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: withVideo,
-    });
+    console.log(`🎥 Requesting media: audio=true, video=${withVideo}`);
 
-    stream.getTracks().forEach(t => console.log("🔎 Track:", t.kind, t));
+    try {
+      const constraints = {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+        },
+        video: withVideo
+          ? {
+              width: { min: 640, ideal: 1280 },
+              height: { min: 480, ideal: 720 },
+              frameRate: { ideal: 30, max: 60 },
+              facingMode: "user",
+            }
+          : false,
+      };
 
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
-    console.log("🎥 Local tracks:", stream.getTracks());
+      console.log("✅ Media acquired successfully");
+      console.log("🆔 Stream ID:", stream.id);
+      console.log("🔊 Audio tracks:", stream.getAudioTracks().length);
+      console.log("📹 Video tracks:", stream.getVideoTracks().length);
 
-    localStreamRef.current = stream;
+      // Log detailed track info
+      stream.getTracks().forEach((track, index) => {
+        console.log(`Track ${index} (${track.kind}):`, {
+          id: track.id,
+          label: track.label,
+          enabled: track.enabled,
+          readyState: track.readyState,
+          settings: track.getSettings ? track.getSettings() : "N/A",
+        });
+      });
 
- if (localVideoRef.current) {
-  localVideoRef.current.srcObject = stream;
-  localVideoRef.current.muted = true; // important for self preview
-  localVideoRef.current.autoplay = true;
-  localVideoRef.current.playsInline = true;
+      localStreamRef.current = stream;
 
-  const playPromise = localVideoRef.current.play();
-  if (playPromise !== undefined) {
-    playPromise.catch(err =>
-      console.warn("▶️ Local video autoplay blocked:", err)
-    );
-  }
-}
+      // Enhanced local video setup
+      if (localVideoRef.current) {
+        console.log("📱 Setting up local video preview");
+        localVideoRef.current.srcObject = stream;
+        localVideoRef.current.muted = true; // Important: mute local preview
+        localVideoRef.current.autoplay = true;
+        localVideoRef.current.playsInline = true;
 
-    return stream;
+        // Enhanced play handling
+        const playPromise = localVideoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log("✅ Local video preview started");
+            })
+            .catch((err) => {
+              console.warn("⚠️ Local video autoplay blocked:", err);
+              // Try to play on user interaction
+            });
+        }
+      }
+
+      return stream;
+    } catch (error) {
+      console.error("❌ Error getting media:", error);
+
+      // More specific error handling
+      if (
+        error.name === "NotFoundError" ||
+        error.name === "DevicesNotFoundError"
+      ) {
+        console.error("Camera/microphone not found");
+      } else if (
+        error.name === "NotAllowedError" ||
+        error.name === "PermissionDeniedError"
+      ) {
+        console.error("Camera/microphone access denied");
+      } else if (
+        error.name === "NotReadableError" ||
+        error.name === "TrackStartError"
+      ) {
+        console.error("Camera/microphone already in use");
+      }
+
+       // fallback: audio only
+    if (withVideo) {
+      try {
+        console.warn("Retrying with audio only...");
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        localStreamRef.current = audioStream;
+        return audioStream;
+      } catch (err2) {
+        console.error("❌ Even audio failed:", err2);
+        throw err2;
+      }
+    }
+
+      throw error;
+    }
   }
 
   const acceptCall = async () => {
-    if (!incomingCall) return;
-    const { from, signal, type } = incomingCall;
+  if (!incomingCall) return;
+  const { from, signal, type } = incomingCall;
+  
+  console.log("📞 Original call type:", type);
+  
+  // TEMPORARY FIX: Force video call if type is undefined
+  // TODO: Fix server to properly send call type
+  let callType = type;
+  if (!callType) {
+    // Ask user what type of call this is
+    const isVideo = window.confirm("Is this a video call? (OK = Video, Cancel = Audio)");
+    callType = isVideo ? 'video' : 'audio';
+    console.log("📹 User selected call type:", callType);
+  }
+  
+  const isVideoCall = callType === 'video';
 
-    setPeerUser(from);
-    setInCall(true);
-    setIncomingCall(null);
-    setVideoOn(type === "video");
+  setPeerUser(from);
+  setInCall(true);
+  setIncomingCall(null);
+  setVideoOn(isVideoCall);
 
-    const stream = await getMedia(type === "video");
-    const p = makePeer(false, stream, from, type);
-    p.signal(signal);
-  };
+  console.log("📹 Requesting media with video:", isVideoCall);
+  const stream = await getMedia(isVideoCall);
+  const p = makePeer(false, stream, from, callType);
+  p.signal(signal);
+};
+
+// Add this function to debug available devices
+async function debugAvailableDevices() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log("🎥 Available devices:");
+    
+    const videoInputs = devices.filter(d => d.kind === 'videoinput');
+    const audioInputs = devices.filter(d => d.kind === 'audioinput');
+    
+    console.log("📹 Video inputs:", videoInputs.length);
+    videoInputs.forEach((device, index) => {
+      console.log(`  ${index}: ${device.label || 'Unknown Camera'} (${device.deviceId})`);
+    });
+    
+    console.log("🔊 Audio inputs:", audioInputs.length);
+    audioInputs.forEach((device, index) => {
+      console.log(`  ${index}: ${device.label || 'Unknown Microphone'} (${device.deviceId})`);
+    });
+    
+    return { videoInputs, audioInputs };
+  } catch (error) {
+    console.error("❌ Error enumerating devices:", error);
+  }
+}
+
+// Call this in your useEffect for debugging
+useEffect(() => {
+  debugAvailableDevices();
+}, []);
 
   const declineCall = () => {
     if (!incomingCall) return;
