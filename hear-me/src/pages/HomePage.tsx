@@ -170,7 +170,6 @@ export default function HomePage() {
   };
 
 
-  // HomePage.tsx
 
 useEffect(() => {
   if (inCall && localVideoRef.current && localStreamRef.current) {
@@ -295,8 +294,6 @@ useEffect(() => {
   
   console.log("📞 Original call type:", type);
   
-  // TEMPORARY FIX: Force video call if type is undefined
-  // TODO: Fix server to properly send call type
   let callType = type;
   if (!callType) {
     // Ask user what type of call this is
