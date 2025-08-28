@@ -33,7 +33,6 @@ export default function HomePage() {
   const peerRef = useRef<SimplePeer.Instance | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
 
-  // video refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -111,7 +110,7 @@ export default function HomePage() {
     const p = new SimplePeer({
       initiator,
       trickle: false,
-      stream, // 👈 ensures both audio + video tracks are forwarded
+      stream, 
       config: pcConfig,
     });
 

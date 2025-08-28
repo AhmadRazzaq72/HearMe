@@ -2,7 +2,7 @@ import { PhoneIncoming, PhoneOff, Phone, Video } from "lucide-react";
 
 interface IncomingCallProps {
   from: string;
-  type?: "audio" | "video"; // 👈 add call type
+  type?: "audio" | "video";
   onAccept: () => void;
   onDecline: () => void;
 }

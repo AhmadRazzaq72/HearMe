@@ -1,4 +1,3 @@
-// src/components/VoiceCallScreen.tsx
 import React from "react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 
