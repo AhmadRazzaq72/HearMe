@@ -3,7 +3,6 @@ import React from "react";
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
 
 export default function CallScreen({
-  peerUser,
   onEnd,
   micOn,
   onToggleMic,

@@ -157,6 +157,8 @@ export default function HomePage() {
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
   }
 
+
+
   // ----- actions -----
   const callUser = async (user: string, isVideo: boolean = false) => {
     if (peerRef.current) return;
@@ -167,6 +169,25 @@ export default function HomePage() {
     makePeer(true, stream, user, isVideo ? "video" : "audio");
     setVideoOn(isVideo);
   };
+
+
+  // HomePage.tsx
+
+useEffect(() => {
+  if (inCall && localVideoRef.current && localStreamRef.current) {
+    console.log("🔄 Attaching local stream after CallScreen mounted");
+    localVideoRef.current.srcObject = localStreamRef.current;
+    localVideoRef.current.muted = true;
+    localVideoRef.current.autoplay = true;
+    localVideoRef.current.playsInline = true;
+
+    localVideoRef.current
+      .play()
+      .then(() => console.log("✅ Local video preview started (reattach)"))
+      .catch((err) => console.warn("⚠️ Local video autoplay blocked:", err));
+  }
+}, [inCall]);
+
 
   async function getMedia(withVideo = false) {
     console.log(`🎥 Requesting media: audio=true, video=${withVideo}`);
@@ -212,7 +233,7 @@ export default function HomePage() {
       if (localVideoRef.current) {
         console.log("📱 Setting up local video preview");
         localVideoRef.current.srcObject = stream;
-        localVideoRef.current.muted = true; // Important: mute local preview
+        localVideoRef.current.muted = true;
         localVideoRef.current.autoplay = true;
         localVideoRef.current.playsInline = true;
 

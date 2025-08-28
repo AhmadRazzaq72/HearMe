@@ -6,7 +6,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onVoiceCall, onVideoCall }: SidebarProps) {
-  const contacts = ["Ali", "Rehman"];
+  const contacts = ["Ali", "Ahmad"];
 
   return (
     <div className="w-80 bg-gray-900 text-white flex flex-col shadow-2xl rounded-r-2xl overflow-hidden">
