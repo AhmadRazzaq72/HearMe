@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 
 // 👇 replace localhost with your ngrok https URL
 export const socket: Socket = io(
-  "https://efe038a2df47.ngrok-free.app", 
+  "https://ccaa326f32d0.ngrok-free.app", 
   { transports: ["websocket"] }
 );
 

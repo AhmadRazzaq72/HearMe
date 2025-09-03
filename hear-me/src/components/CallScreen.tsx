@@ -1,6 +1,17 @@
 // CallScreen.tsx
-import React from "react";
+import type { RefObject } from "react";
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
+
+
+interface CallScreenProps {
+  onEnd: () => void;
+  micOn: boolean;
+  onToggleMic: () => void;
+  videoOn: boolean;
+  onToggleVideo: () => void;
+  localVideoRef: RefObject<HTMLVideoElement>;
+  remoteVideoRef: RefObject<HTMLVideoElement>;
+}
 
 export default function CallScreen({
   onEnd,
@@ -10,7 +21,7 @@ export default function CallScreen({
   onToggleVideo,
   localVideoRef,
   remoteVideoRef,
-}: any) {
+}: CallScreenProps) {
   return (
     <div className="flex flex-col w-full h-full items-center justify-center bg-black relative">
       {/* Remote Video */}

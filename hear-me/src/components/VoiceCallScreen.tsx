@@ -1,12 +1,17 @@
-import React from "react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 
+interface VoiceCallScreenProps {
+  peerUser: string;
+  micOn: boolean;
+  onToggleMic: () => void;
+  onEnd: () => void;
+}
 export default function VoiceCallScreen({
   peerUser,
   micOn,
   onToggleMic,
   onEnd,
-}: any) {
+}: VoiceCallScreenProps) {
   return (
     <div className="flex flex-col w-full h-full items-center justify-center bg-gradient-to-br from-gray-900 to-black text-white relative">
       {/* Peer Info */}
