@@ -1,16 +1,16 @@
 // CallScreen.tsx
-import type { RefObject } from "react";
 import { Mic, MicOff, Video, VideoOff, PhoneOff } from "lucide-react";
 
 
 interface CallScreenProps {
+    peerUser: string;
   onEnd: () => void;
   micOn: boolean;
   onToggleMic: () => void;
   videoOn: boolean;
   onToggleVideo: () => void;
-  localVideoRef: RefObject<HTMLVideoElement>;
-  remoteVideoRef: RefObject<HTMLVideoElement>;
+  localVideoRef: React.RefObject<HTMLVideoElement | null>;
+  remoteVideoRef: React.RefObject<HTMLVideoElement | null>;
 }
 
 export default function CallScreen({
