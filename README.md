@@ -95,3 +95,21 @@ The server will run on `http://localhost:5000`
 - Both users must connect to the same signaling server.  
 - Works best when tested in different browsers or incognito mode.  
 - STUN/TURN servers may be required for connections across different networks.  
+
+
+# Screenshots
+
+## Home Page
+![Home Page](./screenshots/HomePage.png)
+
+## Calling Screen
+![Calling](./screenshots/Calling.png)
+
+## Live Video Call Screen
+![Live Video Call](./screenshots/Live-Video-Call.png)
+
+## Receiver Screen
+![Receiver](./screenshots/Receiver.png)
+
+## Caller Screen
+![Caller](./screenshots/Caller.png)
