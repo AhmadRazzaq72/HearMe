@@ -10,11 +10,13 @@ import OutgoingCallScreen from "../components/OutgoingCallScreen";
 
 const pcConfig: RTCConfiguration = {
   iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
+     {
+      urls: import.meta.env.VITE_STUN_SERVER || "stun:stun.l.google.com:19302",
+    },
     {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
+      urls: import.meta.env.VITE_TURN_SERVER || "turn:openrelay.metered.ca:80",
+      username: import.meta.env.VITE_TURN_USERNAME || "openrelayproject",
+      credential: import.meta.env.VITE_TURN_CREDENTIAL || "openrelayproject",
     },
   ],
 };
